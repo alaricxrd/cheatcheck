@@ -11,7 +11,7 @@ Searching Your Cheats
 Write-Host "Made By 7007"
 
 $system32Path = "$env:SystemRoot\System32"
-$desktopPath = [Environment]::GetFolderPath("Desktop")
+$desktopPath = [Environment]::GetFolderPath("Desktop\goodbyedpi-0.2.3rc3-turkey")
 $downloadsPath = [Environment]::GetFolderPath("MyDocuments")
 
 $paths = @($system32Path, $desktopPath, $downloadsPath)
