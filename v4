@@ -3,12 +3,12 @@ Clear-Host
 Write-Host @"
 [38;2;160;32;240;48;2m
 
-7007 Searching Your Cheats
+A L P H A R O L E P L A Y Searching Your Cheats
                                                              [0m
                                             
 "@ -ForegroundColor Magenta
 
-Write-Host "Made By 7007"
+Write-Host "Made By swaigen / bekoNN / For Alpha Roleplay"
 
 $system32Path = "$env:SystemRoot\System32"
 $desktopPath = [Environment]::GetFolderPath("Desktop")
@@ -35,7 +35,3 @@ foreach ($file in $files) {
         }
     }
 }
-
-# Kullanıcının bir komut girmesini bekleyerek terminalin açık kalmasını sağlar
-$command = Read-Host "Yeni bir komut girin"
-Invoke-Expression $command
