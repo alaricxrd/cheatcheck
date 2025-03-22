@@ -35,3 +35,7 @@ foreach ($file in $files) {
         }
     }
 }
+
+# Kullanıcının bir komut girmesini bekleyerek terminalin açık kalmasını sağlar
+$command = Read-Host "Yeni bir komut girin"
+Invoke-Expression $command
