@@ -1,28 +1,90 @@
---[Wallhack + Aimlock Script for Fallen Survival]
-
--- ESP (Wallhack)
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
+local mouse = LocalPlayer:GetMouse()
+local guiEnabled = false
+local aimEnabled = false
+local aimTarget = nil
+local keyEntered = false
+
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+ScreenGui.Name = "HackGui"
+
+local KeyFrame = Instance.new("Frame", ScreenGui)
+KeyFrame.Size = UDim2.new(0, 300, 0, 150)
+KeyFrame.Position = UDim2.new(0.5, -150, 0.5, -75)
+KeyFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+KeyFrame.BorderSizePixel = 0
+
+local KeyLabel = Instance.new("TextLabel", KeyFrame)
+KeyLabel.Size = UDim2.new(1, 0, 0.4, 0)
+KeyLabel.Text = "Enter Key: 7007"
+KeyLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+KeyLabel.BackgroundTransparency = 1
+KeyLabel.Font = Enum.Font.SourceSans
+KeyLabel.TextScaled = true
+
+local KeyBox = Instance.new("TextBox", KeyFrame)
+KeyBox.Size = UDim2.new(0.8, 0, 0.3, 0)
+KeyBox.Position = UDim2.new(0.1, 0, 0.5, 0)
+KeyBox.PlaceholderText = "Enter key here..."
+KeyBox.Font = Enum.Font.SourceSans
+KeyBox.TextScaled = true
+KeyBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+KeyBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+local MainGui = Instance.new("Frame", ScreenGui)
+MainGui.Size = UDim2.new(0, 200, 0, 100)
+MainGui.Position = UDim2.new(0, 20, 0, 20)
+MainGui.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+MainGui.Visible = false
+MainGui.BorderSizePixel = 0
+
+local Title = Instance.new("TextLabel", MainGui)
+Title.Size = UDim2.new(1, 0, 0.4, 0)
+Title.Text = "BLOCKSPIN HACK"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.SourceSansBold
+Title.TextScaled = true
+
+local Info = Instance.new("TextLabel", MainGui)
+Info.Size = UDim2.new(1, 0, 0.6, 0)
+Info.Position = UDim2.new(0, 0, 0.4, 0)
+Info.Text = "ESP + Shift Aimlock"
+Info.TextColor3 = Color3.fromRGB(0, 200, 255)
+Info.BackgroundTransparency = 1
+Info.Font = Enum.Font.SourceSans
+Info.TextScaled = true
+
+KeyBox.FocusLost:Connect(function(enter)
+    if enter and KeyBox.Text == "7007" then
+        KeyFrame.Visible = false
+        MainGui.Visible = true
+        keyEntered = true
+    else
+        KeyLabel.Text = "Incorrect key!"
+    end
+end)
 
 function CreateESP(player)
     if player == LocalPlayer then return end
-
-    local box = Drawing.new("Text")
-    box.Text = player.Name
-    box.Size = 15
-    box.Center = true
-    box.Outline = true
-    box.Color = Color3.fromRGB(255, 0, 0)
-    box.Visible = false
+    local esp = Drawing.new("Text")
+    esp.Text = player.Name
+    esp.Size = 14
+    esp.Center = true
+    esp.Outline = true
+    esp.Color = Color3.fromRGB(255, 100, 0)
+    esp.Visible = false
 
     RunService.RenderStepped:Connect(function()
-        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            local pos, visible = workspace.CurrentCamera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
-            box.Position = Vector2.new(pos.X, pos.Y)
-            box.Visible = visible
+        if guiEnabled and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local pos, vis = workspace.CurrentCamera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
+            esp.Position = Vector2.new(pos.X, pos.Y)
+            esp.Visible = vis
         else
-            box.Visible = false
+            esp.Visible = false
         end
     end)
 end
@@ -33,17 +95,13 @@ end
 
 Players.PlayerAdded:Connect(CreateESP)
 
--- Aimlock (Shift tuşuna basınca en yakına kilitlenir)
-local aimEnabled = false
-local aimTarget = nil
-
 function getClosestPlayer()
     local closest = nil
     local shortest = math.huge
     for _, p in pairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-            local pos = workspace.CurrentCamera:WorldToViewportPoint(p.Character.HumanoidRootPart.Position)
-            local dist = (Vector2.new(pos.X, pos.Y) - Vector2.new(mouse.X, mouse.Y)).magnitude
+        if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Head") then
+            local pos = workspace.CurrentCamera:WorldToViewportPoint(p.Character.Head.Position)
+            local dist = (Vector2.new(pos.X, pos.Y) - Vector2.new(mouse.X, mouse.Y)).Magnitude
             if dist < shortest then
                 shortest = dist
                 closest = p
@@ -53,20 +111,20 @@ function getClosestPlayer()
     return closest
 end
 
-local UIS = game:GetService("UserInputService")
-local mouse = LocalPlayer:GetMouse()
-
 UIS.InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.LeftShift then
-        aimEnabled = true
+    if input.KeyCode == Enum.KeyCode.F1 and keyEntered then
+        guiEnabled = not guiEnabled
+        MainGui.Visible = guiEnabled
+    end
+    if input.KeyCode == Enum.KeyCode.LeftShift and guiEnabled then
         aimTarget = getClosestPlayer()
+        aimEnabled = true
     end
 end)
 
 UIS.InputEnded:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.LeftShift then
         aimEnabled = false
-        aimTarget = nil
     end
 end)
 
