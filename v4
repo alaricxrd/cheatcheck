@@ -1,37 +1,77 @@
-Clear-Host
+--[Wallhack + Aimlock Script for Fallen Survival]
 
-Write-Host @"
-[38;2;160;32;240;48;2m
+-- ESP (Wallhack)
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
 
-Searching Your Cheats
-                                                             [0m
-                                            
-"@ -ForegroundColor Magenta
+function CreateESP(player)
+    if player == LocalPlayer then return end
 
-Write-Host "Made By 7007"
+    local box = Drawing.new("Text")
+    box.Text = player.Name
+    box.Size = 15
+    box.Center = true
+    box.Outline = true
+    box.Color = Color3.fromRGB(255, 0, 0)
+    box.Visible = false
 
-$system32Path = "$env:SystemRoot\System32"
-$desktopPath = [Environment]::GetFolderPath("Desktop")
-$downloadsPath = [Environment]::GetFolderPath("MyDocuments")
+    RunService.RenderStepped:Connect(function()
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local pos, visible = workspace.CurrentCamera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
+            box.Position = Vector2.new(pos.X, pos.Y)
+            box.Visible = visible
+        else
+            box.Visible = false
+        end
+    end)
+end
 
-$paths = @($system32Path, $desktopPath, $downloadsPath)
-$files = foreach ($path in $paths) {
-    Get-ChildItem -Path $path -File -Recurse -ErrorAction SilentlyContinue
-}
+for _, p in pairs(Players:GetPlayers()) do
+    CreateESP(p)
+end
 
-foreach ($file in $files) {
+Players.PlayerAdded:Connect(CreateESP)
 
-    if ($file.Extension -eq ".exe") {
+-- Aimlock (Shift tuşuna basınca en yakına kilitlenir)
+local aimEnabled = false
+local aimTarget = nil
 
-        $signature = $null
-        try {
-            $signature = (Get-AuthenticodeSignature $file.FullName).Status
-        } catch {
+function getClosestPlayer()
+    local closest = nil
+    local shortest = math.huge
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            local pos = workspace.CurrentCamera:WorldToViewportPoint(p.Character.HumanoidRootPart.Position)
+            local dist = (Vector2.new(pos.X, pos.Y) - Vector2.new(mouse.X, mouse.Y)).magnitude
+            if dist < shortest then
+                shortest = dist
+                closest = p
+            end
+        end
+    end
+    return closest
+end
 
-        }
+local UIS = game:GetService("UserInputService")
+local mouse = LocalPlayer:GetMouse()
 
-        if ($signature -ne "Valid") {
-            Write-Host "Unsigned: $($file.FullName)"
-        }
-    }
-}
+UIS.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.LeftShift then
+        aimEnabled = true
+        aimTarget = getClosestPlayer()
+    end
+end)
+
+UIS.InputEnded:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.LeftShift then
+        aimEnabled = false
+        aimTarget = nil
+    end
+end)
+
+RunService.RenderStepped:Connect(function()
+    if aimEnabled and aimTarget and aimTarget.Character and aimTarget.Character:FindFirstChild("Head") then
+        workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, aimTarget.Character.Head.Position)
+    end
+end)
