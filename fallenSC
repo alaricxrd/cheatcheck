@@ -1,0 +1,36 @@
+local Players, UserInputService, ReplicatedStorage = game:GetService("Players"), game:GetService("UserInputService"), game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer;
+
+local HandleDowning = ReplicatedStorage.Remotes.HandleDowning;
+
+local triggered, oldPosition = false, nil;
+LocalPlayer.CharacterAdded:Connect(function(character)
+    if triggered then
+        wait(1)
+        triggered = false
+        character:MoveTo(oldPosition)
+    end
+end)
+
+local data;
+UserInputService.InputBegan:Connect(function()
+    if UserInputService:IsKeyDown(RespawnBind) then
+        triggered = true
+        oldPosition = LocalPlayer.Character.HumanoidRootPart.Position
+        LocalPlayer.Character.Humanoid.Health -= math.huge;
+    elseif UserInputService:IsKeyDown(DupeBind) then
+        HandleDowning:FireServer(unpack(data))
+    end
+end)
+
+local namecall; namecall = hookmetamethod(game,"__namecall",function(self,...)
+    local args, method = {...}, getnamecallmethod()
+
+    if self == HandleDowning and method == "FireServer" then
+        data = args
+    elseif self.Name == "Remotes" and method == "GetChildren" then
+        return {}
+    end
+
+    return namecall(self, unpack(args))
+end)
